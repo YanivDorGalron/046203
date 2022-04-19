@@ -1,19 +1,23 @@
 def traverse(goal_state, prev):
-    '''
+    """
     extract a plan using the result of dijkstra's algorithm
     :param goal_state: the end state
     :param prev: result of dijkstra's algorithm
     :return: a list of (state, actions) such that the first element is (start_state, a_0), and the last is
     (goal_state, None)
-    '''
-    result = [(goal_state, None)]
-    # remove the following line and complete the algorithm
-    assert False
+    """
+    # state_t = prev[state_t_plus_1.to_string()]
+    prev_state = prev[goal_state.to_string()]
+    result = [(goal_state, prev_state)]  # The action is clear when state_t and state_t_plus_1 are matched
+    while prev_state:
+        current = prev_state.copy()
+        prev_state = prev[current.to_string()]
+        result.append((current, prev_state))
     return result
 
 
 def print_plan(plan):
-    print('plan length {}'.format(len(plan)-1))
+    print('plan length {}'.format(len(plan) - 1))
     for current_state, action in plan:
         print(current_state.to_string())
         if action is not None:

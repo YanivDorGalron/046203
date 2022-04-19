@@ -30,19 +30,19 @@ def dijkstra(puzzle):
     while len(fringe) > 0:
         du, u = heapq.heappop(fringe)  # current minimum
         if u.to_string() in concluded:
-            continue
+            continue  # Skip on states that already been looked at
         concluded.add(u.to_string())
         if u.is_same(goal):
-            break
+            break  # Finished when goal is reached
         curr_actions = u.get_actions()
-        for action in curr_actions:
+        for action in curr_actions:  # Iterate over all possible actions
             v = u.apply_action(action)
-            if v.to_string() not in concluded:
+            if v.to_string() not in concluded:  # making sure we don't go back to already visited states
                 distances[v.to_string()] = distances[u.to_string()] + 1
-                heapq.heappush(fringe,
-                               (distances[v.to_string()], v))  # We do not need to check if d[v]>1+d[u] due to the heapq
+                heapq.heappush(fringe, (distances[v.to_string()], v))
+                # heapq ensures d[v]>1+d[u] so change of d[v] is necessary
                 prev[v.to_string()] = u
-    print(len(concluded))
+    print("number of states visited:{}".format(len(concluded)))
     return prev
 
 
@@ -70,4 +70,4 @@ if __name__ == '__main__':
     print('original number of actions:{}'.format(len(actions)))
     solution_start_time = datetime.datetime.now()
     solve(puzzle)
-    print('time to solve {}'.format(datetime.datetime.now()-solution_start_time))
+    print('time to solve {}'.format(datetime.datetime.now() - solution_start_time))
