@@ -4,6 +4,7 @@ from cartpole_cont import CartPoleContEnv
 
 def get_A(cart_pole_env):
     '''
+
     create and returns the A matrix used in LQR. i.e. x_{t+1} = A * x_t + B * u_t
     :param cart_pole_env: to extract all the relevant constants
     :return: the A matrix used in LQR. i.e. x_{t+1} = A * x_t + B * u_t
