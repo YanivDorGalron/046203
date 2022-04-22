@@ -15,8 +15,15 @@ def get_A(cart_pole_env):
     pole_length = cart_pole_env.length
     dt = cart_pole_env.tau
 
-    return np.matrix([[0]])
+    a_mat = np.zeros((4, 4))
+    a_mat[0][1] = 1
+    a_mat[1][2] = (pole_mass * g) / cart_mass
+    a_mat[2][3] = 1
+    a_mat[3][2] = (g / pole_length) * (1 + pole_mass / cart_mass)
+    a_mat *= dt
+    a_mat += np.identity(4)
 
+    return a_mat
 
 def get_B(cart_pole_env):
     '''
@@ -30,8 +37,11 @@ def get_B(cart_pole_env):
     pole_length = cart_pole_env.length
     dt = cart_pole_env.tau
 
-    return np.matrix([[0]])
-
+    b_mat = np.zeros((4,))
+    b_mat[1] = 1/cart_mass
+    b_mat[3] = 1/(cart_mass*pole_length)
+    b_mat *= dt
+    return b_mat
 
 def find_lqr_control_input(cart_pole_env):
     '''
