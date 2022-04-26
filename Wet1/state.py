@@ -1,10 +1,11 @@
 import os
 
-#check
+
+# check
 class State:
     def __init__(self, s=None):
         if s is None:
-            self._array = [[str(3*i + j) for j in range(3)] for i in range(3)]
+            self._array = [[str(3 * i + j) for j in range(3)] for i in range(3)]
         else:
             array = [[c for c in line.split(' ')] for line in s.split(os.linesep)]
             assert len(array) == 3
@@ -16,7 +17,6 @@ class State:
         result = State()
         result._array = [[c for c in a] for a in self._array]
         return result
-
 
     def _get_location_char(self, c):
         for i in range(3):
@@ -67,7 +67,8 @@ class State:
         elif a == 'r':
             pos2[1] += 1
         pos2 = tuple(pos2)
-        new_state._array[pos2[0]][pos2[1]], new_state._array[pos1[0]][pos1[1]] = new_state._array[pos1[0]][pos1[1]], new_state._array[pos2[0]][pos2[1]]
+        new_state._array[pos2[0]][pos2[1]], new_state._array[pos1[0]][pos1[1]] = new_state._array[pos1[0]][pos1[1]], \
+                                                                                 new_state._array[pos2[0]][pos2[1]]
         return new_state
 
     def get_manhattan_distance(self, other):
@@ -78,6 +79,15 @@ class State:
             diff = abs(self_location[0] - other_location[0]) + abs(self_location[1] - other_location[1])
             total_distance += diff
         return total_distance
+
+    def get_num_incorrect(self, other):
+        num_incorrect = 0
+        for i in range(1, 9):
+            self_location = self._get_location_char(str(i))
+            other_location = other._get_location_char(str(i))
+            if self_location != other_location:
+                num_incorrect += 1
+        return num_incorrect
 
     def is_same(self, other):
         return self.get_manhattan_distance(other) == 0

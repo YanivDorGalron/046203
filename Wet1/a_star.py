@@ -18,7 +18,7 @@ def a_star(puzzle):
     goal = puzzle.goal_state
 
     # this is the heuristic function for of the start state
-    initial_to_goal_heuristic = initial.get_manhattan_distance(goal)
+    initial_to_goal_heuristic = initial.get_num_incorrect(goal)
 
     # the fringe is the queue to pop items from
     fringe = [(initial_to_goal_heuristic, initial)]
@@ -31,8 +31,22 @@ def a_star(puzzle):
     prev = {initial.to_string(): None}
 
     while len(fringe) > 0:
-        # remove the following line and complete the algorithm
-        assert False
+        du, u = heapq.heappop(fringe)  # current minimum
+        if u.to_string() in concluded:
+            continue  # Skip on states that already been looked at
+        concluded.add(u.to_string())
+        if u.is_same(goal):
+            break  # Finished when goal is reached
+        curr_actions = u.get_actions()
+        for action in curr_actions:  # Iterate over all possible actions
+            v = u.apply_action(action)
+            if v.to_string() not in concluded:  # making sure we don't go back to already visited states
+                distances[v.to_string()] = distances[u.to_string()] + 1
+                # only difference from dijkstra
+                heapq.heappush(fringe, (distances[v.to_string()] + v.get_num_incorrect(goal), v))
+                # heapq ensures d[v]>1+d[u] so change of d[v] is necessary
+                prev[v.to_string()] = u
+    print("number of states visited:{}".format(len(concluded)))
 
     return prev
 
@@ -61,4 +75,4 @@ if __name__ == '__main__':
     print('original number of actions:{}'.format(len(actions)))
     solution_start_time = datetime.datetime.now()
     solve(puzzle)
-    print('time to solve {}'.format(datetime.datetime.now()-solution_start_time))
+    print('time to solve {}'.format(datetime.datetime.now() - solution_start_time))
