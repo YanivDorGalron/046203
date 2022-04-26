@@ -18,7 +18,7 @@ def a_star(puzzle):
     goal = puzzle.goal_state
 
     # this is the heuristic function for of the start state
-    initial_to_goal_heuristic = initial.get_manhattan_distance(goal)
+    initial_to_goal_heuristic = initial.get_num_incorrect_distance(goal)
 
     # the fringe is the queue to pop items from
     fringe = [(initial_to_goal_heuristic, initial)]
@@ -43,7 +43,7 @@ def a_star(puzzle):
             if v.to_string() not in concluded:  # making sure we don't go back to already visited states
                 distances[v.to_string()] = distances[u.to_string()] + 1
                 # only difference from dijkstra
-                heapq.heappush(fringe, (distances[v.to_string()] + v.get_manhattan_distance(goal), v))
+                heapq.heappush(fringe, (distances[v.to_string()] + v.get_num_incorrect_distance(goal), v))
                 # heapq ensures d[v]>1+d[u] so change of d[v] is necessary
                 prev[v.to_string()] = u
     print("number of states visited:{}".format(len(concluded)))
