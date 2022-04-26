@@ -81,13 +81,13 @@ class State:
         return total_distance
 
     def get_num_incorrect_distance(self, other):
-        num_incorrect = 0
+        total_distance = 0
         for i in range(1, 9):
             self_location = self._get_location_char(str(i))
             other_location = other._get_location_char(str(i))
-            if self_location != other_location:
-                num_incorrect += 1
-        return num_incorrect
+            diff = abs(self_location[0] - other_location[0]) + abs(self_location[1] - other_location[1])
+            total_distance += diff
+        return total_distance
 
     def is_same(self, other):
         return self.get_manhattan_distance(other) == 0
