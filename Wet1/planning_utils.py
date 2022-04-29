@@ -12,7 +12,11 @@ def traverse(goal_state, prev):
     while prev_state:
         current = prev_state.copy()
         prev_state = prev[current.to_string()]
-        result.append((current, prev_state))
+        for action in prev_state.get_actions():
+            if prev_state.apply_action(action) == current:
+                result.append((current, action))
+                break
+
     return result
 
 
