@@ -8,15 +8,18 @@ def traverse(goal_state, prev):
     """
     # state_t = prev[state_t_plus_1.to_string()]
     prev_state = prev[goal_state.to_string()]
-    result = [(goal_state, prev_state)]  # The action is clear when state_t and state_t_plus_1 are matched
+
+    result = [(goal_state, None)]  # The action is clear when state_t and state_t_plus_1 are matched
+    current = result[-1][0]
     while prev_state:
-        current = prev_state.copy()
-        prev_state = prev[current.to_string()]
         for action in prev_state.get_actions():
             if prev_state.apply_action(action) == current:
-                result.append((current, action))
+                result.append((prev_state, action))
                 break
+        current = prev_state.copy()
+        prev_state = prev[current.to_string()]
 
+    result.reverse()
     return result
 
 
