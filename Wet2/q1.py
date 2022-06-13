@@ -15,6 +15,42 @@ class BlackJack:
         self.n_ys = 10
         self.n_states = self.n_xs * self.n_ys + 1
 
+    def plot_value_func(self, value_func, fig):
+        ax = fig.gca(projection='3d')
+
+        X = np.arange(4, 21, 1)
+        Y = np.arange(2, 12, 1)
+        X, Y = np.meshgrid(X, Y)
+        Z = np.zeros(list(np.shape(X)))
+        for i in range(np.shape(X)[0]):
+            for j in range(np.shape(X)[1]):
+                Z[i, j] = value_func[self.x_y_to_ind(X[i, j], Y[i, j])]
+
+        surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        # Add a color bar which maps values to colors.
+        fig.colorbar(surf, shrink=0.5, aspect=5)
+
+        ax.set_xlabel('Player sum of card')
+        ax.set_ylabel('Dealers showing')
+        ax.set_zlabel('value function')
+
+    def plot_policy(self, policy):
+        max_hit_policy = np.full(self.n_ys, self.n_xs)
+        for y in range(self.n_ys):
+            for x in range(self.n_xs):
+                if policy[self.x_y_to_ind(x + 4, y + 2)] == 0:
+                    max_hit_policy[y] = x
+                    break
+        plt.plot(list(range(2, 2 + self.n_ys)), max_hit_policy + 4)
+        plt.xticks(list(range(2, 2 + self.n_ys)), list(range(2, 2 + self.n_ys)))
+        plt.ylim(top=20, bottom=4)
+        plt.xlim(right=11, left=2)
+        plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.zeros(self.n_ys), color='g')
+        plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.full(self.n_ys, self.n_xs + 5),
+                         color='r')
+        plt.text(6, 8, "Hit", size=20)
+        plt.text(6, 18, "Stick", size=20)
+
     def ind_to_x_y(self, state):
         y = int(state / self.n_xs + 2)
         x = state - (y - 2) * self.n_xs + 4
@@ -26,10 +62,8 @@ class BlackJack:
         return (y - 2) * self.n_xs + x - 4
 
     def get_dealer_prob(self, y, stopy):
-        if y >= 17:
-            # The dealer stops
-            if stopy > 21:
-                # We don't care about the exact value, the dealer is losing in this scenario
+        if y >= 17:  # The dealer stops
+            if stopy > 21:  # the dealer is losing in this scenario
                 return y > 21
             return y == stopy
         tot_prob = 0
@@ -67,9 +101,9 @@ class BlackJack:
         curr_policy = np.zeros(self.n_states)
         next_value = np.zeros(self.n_states)
 
-        iter = 1
-        while iter <= max_num_iter:
-            iter += 1
+        iteration = 1
+        while iteration <= max_num_iter:
+            iteration += 1
             for s in range(self.n_states - 1):
                 r_exp_stick = self.get_r_exp_on_stick(s)
                 r_exp_hit = self.get_r_exp_on_hit(s, curr_value)
@@ -80,48 +114,12 @@ class BlackJack:
             curr_value = next_value.copy()
         return curr_value, curr_policy
 
-    def plot_value_func(self, value_func, fig):
 
-        ax = fig.gca(projection='3d')
-
-        X = np.arange(4, 21, 1)
-        Y = np.arange(2, 12, 1)
-        X, Y = np.meshgrid(X, Y)
-        Z = np.zeros(list(np.shape(X)))
-        for i in range(np.shape(X)[0]):
-            for j in range(np.shape(X)[1]):
-                Z[i, j] = value_func[self.x_y_to_ind(X[i, j], Y[i, j])]
-
-        surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-
-        # Customize the z axis.
-        ax.set_zlim(-1.01, 1.01)
-        ax.zaxis.set_major_locator(LinearLocator(10))
-        ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-
-        # Add a color bar which maps values to colors.
-        fig.colorbar(surf, shrink=0.5, aspect=5)
-
-        ax.set_xlabel('Player sum of card')
-        ax.set_ylabel('Dealers showing')
-        ax.set_zlabel('value function')
-
-    def plot_policy(self, policy):
-        max_hit_policy = np.full(self.n_ys, self.n_xs)
-        for y in range(self.n_ys):
-            for x in range(self.n_xs):
-                if policy[self.x_y_to_ind(x + 4, y + 2)] == 0:
-                    max_hit_policy[y] = x
-                    break
-        plt.plot(list(range(2, 2 + self.n_ys)), max_hit_policy + 4)
-        plt.xticks(list(range(2, 2 + self.n_ys)), list(range(2, 2 + self.n_ys)))
-        plt.ylim(top=20, bottom=4)
-        plt.xlim(right=11, left=2)
-        plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.zeros(self.n_ys), color='g')
-        plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.full(self.n_ys, self.n_xs + 5),
-                         color='r')
-        plt.text(6, 8, "Hit", size=20)
-        plt.text(6, 18, "Stick", size=20)
+def create_pixel_files(directory, optimal_value, optim_policy):
+    with open(directory + 'value_function.pickle', 'wb') as handle:
+        pickle.dump(optimal_value, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open(directory + 'policy.pickle', 'wb') as handle:
+        pickle.dump(optim_policy, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == '__main__':
@@ -129,24 +127,20 @@ if __name__ == '__main__':
     game = BlackJack()
 
     # creating value_function and policy pickle files
-
     optimal_val, optimal_policy = game.value_iteration(50)
-    # with open(results_dir + 'value_function.pickle', 'wb') as handle:
-    #     pickle.dump(optimal_val, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    # with open(results_dir + 'policy.pickle', 'wb') as handle:
-    #     pickle.dump(optimal_policy, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # create_pixel_files(results_dir, optimal_val, optimal_policy)
 
     # section b
+    fig = plt.figure()
     with open(results_dir + 'value_function.pickle', 'rb') as handle:
         value = pickle.load(handle)
-        fig = plt.figure()
         game.plot_value_func(value, fig)
         # plt.show()
         plt.savefig(results_dir + 'Q1_value_function.png')
 
     # section c
+    fig = plt.figure()
     with open(results_dir + 'policy.pickle', 'rb') as handle:
         policy = pickle.load(handle)
-        fig = plt.figure()
         game.plot_policy(policy)
         plt.savefig(results_dir + 'Q1_policy.png')

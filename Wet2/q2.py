@@ -9,20 +9,7 @@ class Cmu:
         self.N = len(costs)
         self.n_states = 2 ** self.N
 
-    def _get_binary_state(self, state):
-        b_str = np.binary_repr(state, self.N)
-        b_list = [int(c) for c in b_str]
-        return np.asarray(b_list)
-
-    def _calc_state_cost(self, state_b):
-        total_cost = 0
-        for i in range(self.N):
-            if state_b[i]:
-                # this means that the i'th job is still waiting in the queue
-                total_cost += self.costs[i]
-        return total_cost
-
-    def _bellman_equation_one_step(self, action, curr_val, state):
+    def _bel_eq_one_step(self, action, curr_val, state):
         next_state_val_exp = 0
         b_start_state = self._get_binary_state(state)
         job = action
@@ -37,12 +24,21 @@ class Cmu:
         next_state_val_exp += curr_val[next_state_2_int] * self.probs[job]
         return -self._calc_state_cost(self._get_binary_state(state)) + next_state_val_exp
 
+    def _get_binary_state(self, state):
+        binary_state_list = [int(c) for c in np.binary_repr(state, self.N)]
+        return np.asarray(binary_state_list)
+
+    def _calc_state_cost(self, state_b):
+        total_cost = [self.costs[i] for i in range(self.N) if state_b[i]]  # sum only if job is still in the queue
+        total_cost = sum(total_cost)
+        return total_cost
+
     def policy_eval(self, policy):
         curr_val = np.zeros(self.n_states)
         next_val = np.zeros(self.n_states)
         while True:
             for i in range(1, self.n_states):
-                next_val[i] = self._bellman_equation_one_step(policy[i], curr_val, i)
+                next_val[i] = self._bel_eq_one_step(policy[i], curr_val, i)
             if np.array_equal(curr_val, next_val):
                 return curr_val
             curr_val = next_val.copy()
