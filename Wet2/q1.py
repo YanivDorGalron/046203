@@ -8,7 +8,7 @@ import pickle
 
 class BlackJack:
     def __init__(self):
-        self.value_probs = np.asarray([1 / 13, 1 / 13, 1 / 13, 1 / 13, 1 / 13, 1 / 13, 1 / 13, 1 / 13, 4 / 13, 1 / 13])
+        self.value_probs = np.asarray([1, 1, 1, 1, 1, 1, 1, 1, 4, 1]) / 13
         self.card_values = np.asarray([2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 
         self.n_xs = 17
@@ -26,13 +26,6 @@ class BlackJack:
         return (y - 2) * self.n_xs + x - 4
 
     def get_dealer_prob(self, y, stopy):
-        """
-        The probability of the dealer to stop at stopy (when starting from y)
-        :param y: The starting value
-        :param stopy: The stopping value
-        :return: The probability
-        """
-
         if y >= 17:
             # The dealer stops
             if stopy > 21:
@@ -45,12 +38,6 @@ class BlackJack:
         return tot_prob
 
     def get_r_exp_on_stick(self, state):
-        """
-        In this stage, the player decided to stick. he has no more actions to do in the game and we just need to
-        calculate the expectancy of him to win (based on the dealers policy)
-        :param state: The current state of the game (when the player decided to stick)
-        :return: the reward expectancy
-        """
         x, y = self.ind_to_x_y(state)
         chance_win_stick = 0
         for y_stop in range(y + 2, x):
@@ -80,10 +67,8 @@ class BlackJack:
         curr_policy = np.zeros(self.n_states)
         next_value = np.zeros(self.n_states)
 
-        print("at value iteration:")
         iter = 1
         while iter <= max_num_iter:
-            print("itreation number: {}".format(iter))
             iter += 1
             for s in range(self.n_states - 1):
                 r_exp_stick = self.get_r_exp_on_stick(s)
@@ -107,8 +92,7 @@ class BlackJack:
             for j in range(np.shape(X)[1]):
                 Z[i, j] = value_func[self.x_y_to_ind(X[i, j], Y[i, j])]
 
-        surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
-                               linewidth=0, antialiased=False)
+        surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 
         # Customize the z axis.
         ax.set_zlim(-1.01, 1.01)
@@ -126,7 +110,7 @@ class BlackJack:
         max_hit_policy = np.full(self.n_ys, self.n_xs)
         for y in range(self.n_ys):
             for x in range(self.n_xs):
-                if policy[self.x_y_to_ind(x+4, y+2)]==0:
+                if policy[self.x_y_to_ind(x + 4, y + 2)] == 0:
                     max_hit_policy[y] = x
                     break
         plt.plot(list(range(2, 2 + self.n_ys)), max_hit_policy + 4)
@@ -134,19 +118,10 @@ class BlackJack:
         plt.ylim(top=20, bottom=4)
         plt.xlim(right=11, left=2)
         plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.zeros(self.n_ys), color='g')
-        plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.full(self.n_ys,self.n_xs+5), color='r')
-        plt.text(6, 8, "Hit", size=20,
-                 bbox=dict(boxstyle="round",
-                           ec=(1., 0.5, 0.5),
-                           fc=(1., 0.8, 0.8),
-                           )
-                 )
-        plt.text(6, 18, "Stick", size=20,
-                 bbox=dict(boxstyle="round",
-                           ec=(1., 0.5, 0.5),
-                           fc=(1., 0.8, 0.8),
-                           )
-                 )
+        plt.fill_between(list(range(2, 2 + self.n_ys)), max_hit_policy + 4, np.full(self.n_ys, self.n_xs + 5),
+                         color='r')
+        plt.text(6, 8, "Hit", size=20)
+        plt.text(6, 18, "Stick", size=20)
 
 
 if __name__ == '__main__':
