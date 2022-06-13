@@ -10,10 +10,9 @@ class Cmu:
         self.n_states = 2 ** self.N
 
     def _bel_eq_one_step(self, action, curr_val, state):
-        next_state_val_exp = 0
+        next_state_val_exp, job = 0, action
         b_start_state = self._get_binary_state(state)
-        job = action
-        assert b_start_state[job] != 0, "choosen job must be an unfinished job"
+        assert b_start_state[job] != 0, "chosen job must be an unfinished job"
         next_state_1 = b_start_state.copy()
         next_state_2 = b_start_state.copy()
         next_state_2[job] = 0
@@ -47,14 +46,11 @@ class Cmu:
         policy = np.zeros(self.n_states, dtype=np.uint8)
         for i in range(self.n_states):
             b_state = list(self._get_binary_state(i))
-            max_c_job = 0
-            max_c = 0
+            max_c_job, max_c = 0, 0
             for job in range(self.N):
-                if b_state[job] == 1:
-                    # we can only choose from the unfinished jobs
+                if b_state[job] == 1:  # we can only choose from the unfinished jobs
                     if self.costs[job] > max_c:
-                        max_c = costs[job]
-                        max_c_job = job
+                        max_c, max_c_job = costs[job], job
             policy[i] = max_c_job
         return policy
 
